@@ -1,4 +1,6 @@
+import AtmPad from "./AtmPads";
 import { useState } from "react";
+
 
 function App() {
   const [view, setView] = useState("home"); // home | create | login | change | delete
@@ -6,7 +8,8 @@ function App() {
   const [pin, setPin] = useState("");
   const [balance, setBalance] = useState("");
   const [date, setDate] = useState("");
-
+  const [showKeypad, setShowKeypad] = useState(false);
+  const [encryptedPin, setEncryptedPin] = useState("");
   const [newPin, setNewPin] = useState("");
   const [message, setMessage] = useState("");
 
@@ -25,6 +28,12 @@ function App() {
     } catch (err) {
       setMessage("Server error: " + err.message);
     }
+  };
+
+  const handleOpenKeypad = () => {
+    if (pin.length === 4) setShowKeypad(true);
+    
+    else alert("Please enter a valid 4-digit PIN first!");
   };
 
   const handleCreate = (e) => {
@@ -58,6 +67,7 @@ function App() {
   return (    
 
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white p-6">
+    
       <h1 className="text-3xl font-bold mb-4">🏦 MCC Bank Portal</h1>
 
       <div className="flex space-x-2 mb-6">
@@ -94,13 +104,7 @@ function App() {
             onChange={(e) => setUsername(e.target.value)}
             required
           />
-          <input
-            className="p-2 rounded bg-gray-800 border border-gray-600 w-64"
-            placeholder="4-digit PIN"
-            value={pin}
-            onChange={(e) => setPin(e.target.value)}
-            required
-          />
+
           <input
             className="p-2 rounded bg-gray-800 border border-gray-600 w-64"
             placeholder="Initial Balance"
@@ -121,6 +125,48 @@ function App() {
           >
             Create Account
           </button>
+     
+      {/* Input form */}
+      {!showKeypad && (
+        <div className="flex flex-col items-center space-y-3">
+          <input
+            className="p-2 rounded bg-gray-800 border border-gray-600 w-64 text-center"
+            placeholder="Enter 4-digit PIN"
+            value={pin}
+            maxLength={4}
+            onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
+          />
+        
+      {/* Button to show ATM Keypad */}
+      {!showKeypad && (
+        <button
+          className="px-6 py-2 bg-green-600 rounded-lg font-semibold hover:bg-green-700 transition"
+          onClick={() => setShowKeypad(true)}
+        >
+          Open ATM Keypad
+        </button>
+      )}
+        </div>
+      )}
+
+      {/* Keypad */}
+      {showKeypad && (
+               <AtmPad
+          onClose={() => setShowKeypad(false)}
+          onPinEntered={(value) => {
+            setPin(value);
+            setShowKeypad(false);
+          }}
+        />
+      )}
+
+      {/* Show encrypted PIN if exists */}
+      {encryptedPin && (
+        <div className="text-sm mt-4 text-blue-400 break-all">
+          <p>Encrypted PIN:</p>
+          <p>{encryptedPin}</p>
+        </div>
+      )}
         </form>
       )}
 
