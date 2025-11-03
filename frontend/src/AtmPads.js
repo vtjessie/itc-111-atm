@@ -21,6 +21,7 @@ function AtmPad({ onClose, onPinEntered }) {
       setError("PIN must be 4 digits.");
       return;
     }
+    //alert("ATM")
     onPinEntered(pin); // ✅ send pin back to App.js
     setError("");
   };

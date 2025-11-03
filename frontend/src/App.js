@@ -1,22 +1,33 @@
 import AtmPad from "./AtmPads";
+
+import ChangePin from "./ChangePin";
+import Create from "./Create";
+import CheckBalance from "./CheckBalance.js";
+import Transaction from "./Transaction.js";
+import Login from "./Login.js";
 import { useState } from "react";
 
 
 function App() {
+  
+
   const [view, setView] = useState("home"); // home | create | login | change | delete
+  const [tran, setTran] = useState(null);
+
   const [username, setUsername] = useState("");
   const [pin, setPin] = useState("");
-  const [balance, setBalance] = useState("");
-  const [date, setDate] = useState("");
-  const [showKeypad, setShowKeypad] = useState(false);
-  const [encryptedPin, setEncryptedPin] = useState("");
-  const [newPin, setNewPin] = useState("");
+  const [balance, setBalance] = useState(0.0);
+
   const [message, setMessage] = useState("");
 
+  //const [activeTab, setActiveTab] = useState("home");
   const API_URL = "http://127.0.0.1:5002";
+
+
 
   // Generic POST function
   const postData = async (url, data, method = "POST") => {
+    //const payload = { username, balance, pin,date };
     try {
       const res = await fetch(`${API_URL}${url}`, {
         method,
@@ -25,30 +36,90 @@ function App() {
       });
       const result = await res.json();
       setMessage(result.message || result.error || "Unknown error");
+      console.log("✅ Server response:", result);
+      return result;
+
     } catch (err) {
       setMessage("Server error: " + err.message);
+      return { error: err.message };
     }
   };
 
-  const handleOpenKeypad = () => {
-    if (pin.length === 4) setShowKeypad(true);
+
+  const handleCreate = async (data) => {
+    //data.preventDefault();
+    //setFormData(data);
+
+    const result = await postData("/create-account", data);
+    //alert(`CREATE  ${data.username}`);
+    if (result.error) {
+      setMessage(` Failed: ${result.error}`);
+    } else {
+      setMessage(" Account created successfully!");
+    }
+  };
+
+  const handleTransaction = async (data) => {
+    //e.preventDefault();
+    if (!data.username || !data.pin || !data.amount) {
+      alert("Please fill all fields!");
+      return;
+    }
     
-    else alert("Please enter a valid 4-digit PIN first!");
+
+    const res = postData("/update-balance", data);
+    if (res.error) {
+      setMessage(` Failed: ${res.message}`);
+    }
+  }
+
+
+  const checkBalance = async (data) => {
+    //const { username, pin } = data;
+    //e.preventDefault();
+    if (!data.username || data.pin.length !== 4) {
+      alert("Please fill all fields!");
+      return;
+    }
+    //alert(`Your!!!!! user is $${data.username} !!!!${data.pin}`)
+    const res = await postData("/balance", data);
+
+    if (res.error) {
+      alert(res.error || "Failed to fetch balance");
+      return;
+    }
+    //setUsername (data.username) ;           
+    setBalance(res.balance);
+
   };
 
-  const handleCreate = (e) => {
-    e.preventDefault();
-    postData("/create-account", { username, pin, balance,Date });
+  const handleLogin = (data) => {
+    // e.preventDefault();
+    if (!data.username || data.pin.length !== 4) {
+
+      return;
+    }
+    if(view=="login")
+      postData("/login", data);
+    else if(view=="delete"){
+   
+      postData("/delete-account", { username:data.username ,pin:data.pin , confirm: "DELETE" }, "DELETE");
+    // Delay closing slightly so state updates fully
+                                setTimeout(() => {
+                                 
+                                }, 100);
+    
+      return
+    }
   };
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    postData("/login", { username, pin });
-  };
-
-  const handleChangePin = (e) => {
-    e.preventDefault();
-    postData("/change-pin", { username, old_pin: pin, new_pin: newPin });
+  const handleChangePin = (data) => {
+    //e.preventDefault();
+    if (!data.username || data.old_pin.length !== 4 || data.new_pin.length !== 4) {
+      //alert("Please enter your username and a 4-digit PIN.");
+      return;
+    }
+    postData("/change-pin", data);
   };
 
   const handleDelete = (e) => {
@@ -57,35 +128,40 @@ function App() {
   };
 
   const clearFields = () => {
-    setUsername("");
-    setPin("");
-    setBalance("");
-    setNewPin("");
+    //setUsername("");
+    //setPin("");
+    //setBalance("");
+    //setNewPin("");
+    //setAmount("")
     setMessage("");
+ 
   };
 
-  return (    
+  return (
 
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white p-6">
-    
+
       <h1 className="text-3xl font-bold mb-4">🏦 MCC Bank Portal</h1>
 
       <div className="flex space-x-2 mb-6">
-        {["home", "create", "login", "change", "delete"].map((v) => (
+        {["home", "create", "transaction", "login", "checkbalance", "change", "delete"].map((v) => (
           <button
             key={v}
             onClick={() => {
               setView(v);
               clearFields();
+              
             }}
-            className={`px-3 py-2 rounded ${
-              view === v ? "bg-blue-600" : "bg-gray-700 hover:bg-gray-600"
-            }`}
+            className={`px-3 py-2 rounded ${view === v ? "bg-blue-600" : "bg-gray-700 hover:bg-gray-600"
+              }`}
           >
             {v.toUpperCase()}
           </button>
         ))}
       </div>
+      <p className="text-gray-400 text-sm">
+        Old PIN: {pin} | Username: {username}
+      </p>
 
       {/* Home */}
       {view === "home" && (
@@ -95,162 +171,55 @@ function App() {
       )}
 
       {/* Create Account */}
-      {view === "create" && (
-        <form onSubmit={handleCreate} className="space-y-3">
-          <input
-            className="p-2 rounded bg-gray-800 border border-gray-600 w-64"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-
-          <input
-            className="p-2 rounded bg-gray-800 border border-gray-600 w-64"
-            placeholder="Initial Balance"
-            value={balance}
-            onChange={(e) => setBalance(e.target.value)}
-            required
-          />
-          {/* 📅 Date picker */}
-          <input
-            type="date"
-            className="p-2 rounded bg-gray-800 border border-gray-600 w-64"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-          />
-          <button
-            className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded"
-            type="submit"
-          >
-            Create Account
-          </button>
-     
-      {/* Input form */}
-      {!showKeypad && (
-        <div className="flex flex-col items-center space-y-3">
-          <input
-            className="p-2 rounded bg-gray-800 border border-gray-600 w-64 text-center"
-            placeholder="Enter 4-digit PIN"
-            value={pin}
-            maxLength={4}
-            onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
-          />
-        
-      {/* Button to show ATM Keypad */}
-      {!showKeypad && (
-        <button
-          className="px-6 py-2 bg-green-600 rounded-lg font-semibold hover:bg-green-700 transition"
-          onClick={() => setShowKeypad(true)}
-        >
-          Open ATM Keypad
-        </button>
-      )}
-        </div>
-      )}
-
-      {/* Keypad */}
-      {showKeypad && (
-               <AtmPad
-          onClose={() => setShowKeypad(false)}
-          onPinEntered={(value) => {
-            setPin(value);
-            setShowKeypad(false);
-          }}
-        />
-      )}
-
-      {/* Show encrypted PIN if exists */}
-      {encryptedPin && (
-        <div className="text-sm mt-4 text-blue-400 break-all">
-          <p>Encrypted PIN:</p>
-          <p>{encryptedPin}</p>
-        </div>
-      )}
-        </form>
-      )}
+      {view === "create" &&
+        (
+          <Create onFormSubmit={handleCreate} />)
+      }
 
       {/* Login */}
-      {view === "login" && (
-        <form onSubmit={handleLogin} className="space-y-3">
-          <input
-            className="p-2 rounded bg-gray-800 border border-gray-600 w-64"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-          <input
-            className="p-2 rounded bg-gray-800 border border-gray-600 w-64"
-            placeholder="PIN"
-            value={pin}
-            onChange={(e) => setPin(e.target.value)}
-            required
-          />
-          <button
-            className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded"
-            type="submit"
-          >
-            Login
-          </button>
-        </form>
+      {view === "loggin" && (
+        <Login onFormSubmit={handleLogin} />
       )}
+
+      {/*Check Balance*/}
+
+      {view === "checkbalance" && (
+
+        <div>
+          <CheckBalance onFormSubmit={checkBalance}
+          />
+          <p className="mt-4 text-green-400">
+            💰 Your Balance: ${balance} <br />
+          </p>
+        </div>
+      )}
+
+      {/* 💵 Transaction Section */}
+      {view === "transaction" && (
+
+        <Transaction onFormSubmit={handleTransaction} />
+      )}
+
+
+
 
       {/* Change PIN */}
       {view === "change" && (
-        <form onSubmit={handleChangePin} className="space-y-3">
-          <input
-            className="p-2 rounded bg-gray-800 border border-gray-600 w-64"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-          <input
-            className="p-2 rounded bg-gray-800 border border-gray-600 w-64"
-            placeholder="Current PIN"
-            value={pin}
-            onChange={(e) => setPin(e.target.value)}
-            required
-          />
-          <input
-            className="p-2 rounded bg-gray-800 border border-gray-600 w-64"
-            placeholder="New PIN"
-            value={newPin}
-            onChange={(e) => setNewPin(e.target.value)}
-            required
-          />
-          <button
-            className="bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded"
-            type="submit"
-          >
-            Change PIN
-          </button>
-        </form>
+            <ChangePin onFormSubmit={handleChangePin} />
       )}
+
 
       {/* Delete Account */}
-      {view === "delete" && (
-        <form onSubmit={handleDelete} className="space-y-3">
-          <input
-            className="p-2 rounded bg-gray-800 border border-gray-600 w-64"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-          <button
-            className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded"
-            type="submit"
-          >
-            Delete Account
-          </button>
-        </form>
+      {/* DYNAMICALLY SHOW LOGIN COMPONENT */}
+       {/* Render Login component */}
+      {(view === "login" || view === "delete") && (
+        <Login view={view} onFormSubmit={handleLogin} />
       )}
-
+      
       {/* Response Message */}
       {message && <p className="mt-6 text-green-400">{message}</p>}
-    </div>
+    </div
+    >
   );
 }
 
