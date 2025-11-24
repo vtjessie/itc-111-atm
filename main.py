@@ -11,7 +11,7 @@ def main():
 
 
 
-   // print("Welcome to the ATM System\n")
+    print("Welcome to the ATM System\n")
     str = "Welcome to the ATM System\n"
     while True:
         print("--- Main Menu ---")
