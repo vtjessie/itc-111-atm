@@ -7,17 +7,11 @@ function Transaction({ onFormSubmit }) {
     const [username, setUsername] = useState("");
     const [pin, setPin] = useState("");
     const [tran, setTran] = useState(null);
-    //const [showTransactionMenu, setShowTransactionMenu] = useState(false);
+    
     const [transactionType, setTransactionType] = useState("");
     const [amount, setAmount] = useState("");
-    //const [balance, setBalance] = useState(0.0);
-
-
     const handleSubmit = (e) => {
         e.preventDefault();
-
-        //setBalance(null);
-
         if (!username || pin.length !== 4) {
 
             return //alert("Please fill all fields");

@@ -105,10 +105,7 @@ function ChangePin({ onFormSubmit }) {
                     </button>
 
                 </p>
-                {/* Optional debug info */}
-                <p className="text-gray-400 text-sm">
-                    Old PIN: {pin} | New PIN: {newPin}
-                </p>
+                
             </form>
 
         </div>

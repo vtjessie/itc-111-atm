@@ -159,9 +159,7 @@ function App() {
           </button>
         ))}
       </div>
-      <p className="text-gray-400 text-sm">
-        Old PIN: {pin} | Username: {username}
-      </p>
+    
 
       {/* Home */}
       {view === "home" && (

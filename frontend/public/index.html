@@ -41,3 +41,223 @@
     -->
   </body>
 </html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MCC Bank Portal</title>
+
+  <!-- Font: optional, looks good on dark -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <!-- Icons: Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg: #0f141b;
+      --panel: #151b23;
+      --text: #e6edf3;
+      --muted: #9fb0c1;
+      --primary: #2e8cff;
+      --primary-10: rgba(46,140,255,.10);
+      --danger: #ff6b6b;
+      --radius: 12px;
+      --shadow: 0 8px 24px rgba(0,0,0,.35);
+      --ring: 0 0 0 3px var(--primary-10);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body{
+      margin:0;
+      background: radial-gradient(1200px 800px at 20% -20%, #1a2230 0, transparent 60%) no-repeat,
+                  radial-gradient(900px 600px at 120% 20%, #172130 0, transparent 55%) no-repeat,
+                  var(--bg);
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      line-height: 1.4;
+    }
+
+    /* Layout */
+    .shell{
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 20px 96px; /* extra bottom for footer breathing room */
+      min-height: 100%;
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: 24px;
+    }
+
+    header{
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+    .logo{
+      width:36px;height:36px;
+      display:grid;place-items:center;
+      background: linear-gradient(180deg,#2b3443,#1b2230);
+      border:1px solid #263043;
+      border-radius:10px;
+      box-shadow: var(--shadow);
+    }
+    .logo i{ color:#ffd166; }
+    .title{
+      font-weight:700; font-size: clamp(22px, 2.3vw, 28px);
+    }
+
+    /* Nav / actions */
+    nav{
+      background: rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius: var(--radius);
+      padding: 10px;
+      display:flex; flex-wrap: wrap; gap:10px;
+      box-shadow: var(--shadow);
+    }
+    .btn{
+      --btn-bg: #1a212c;
+      --btn-border: #263246;
+      display:inline-flex; align-items:center; gap:.55rem;
+      padding:10px 14px;
+      border-radius: 10px;
+      background: var(--btn-bg);
+      border:1px solid var(--btn-border);
+      color: var(--text);
+      text-decoration:none;
+      font-weight:600; letter-spacing:.15px;
+      transition: transform .06s ease, background .18s ease, border-color .18s ease, box-shadow .18s ease, color .18s ease;
+      position: relative;
+    }
+    .btn i{ font-size: 0.95rem; color: var(--muted); transition: color .18s ease; }
+
+    .btn:hover{
+      background: #202838;
+      border-color: #2b3a52;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.02);
+    }
+    .btn:hover i{ color: var(--text); }
+
+    .btn:focus-visible{
+      outline: none;
+      box-shadow: var(--ring), 0 6px 18px rgba(0,0,0,.35);
+    }
+
+    /* Active/selected page */
+    .btn.active{
+      background: linear-gradient(180deg, #23314a, #1b2740);
+      border-color: #3868ff55;
+      color: #eaf1ff;
+    }
+    .btn.active i{
+      color: var(--primary);
+    }
+
+    /* Special variants */
+    .btn.danger:hover{
+      border-color: #ff6b6b66;
+      background: #2a1b1b;
+      color: #ffecec;
+    }
+    .btn.danger:hover i{ color:#ff9d9d; }
+
+    main{
+      background: var(--panel);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: var(--shadow);
+    }
+    .lead{
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    footer{
+      position: sticky; bottom: 0;
+      margin-top: 28px;
+      background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
+      border-top:1px solid rgba(255,255,255,.08);
+      backdrop-filter: blur(6px);
+    }
+    .footer-inner{
+      max-width:1100px; margin:0 auto; padding:16px 20px;
+      display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    .links{ display:flex; gap:16px; flex-wrap:wrap; }
+    .links a{
+      color: var(--muted);
+      text-decoration:none;
+      border-bottom: 1px dashed transparent;
+      transition: color .18s ease, border-color .18s ease;
+    }
+    .links a:hover{
+      color: var(--text);
+      border-color: var(--text);
+    }
+
+    /* Small screens */
+    @media (max-width: 560px){
+      .btn{ padding:10px 12px; }
+      .btn span{ display:none; }           /* show only icons on tiny screens */
+      .btn i{ margin-right:0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div class="logo" aria-hidden="true">
+        <i class="fa-solid fa-landmark"></i>
+      </div>
+      <div class="title">MCC Bank Portal</div>
+    </header>
+
+    <nav aria-label="Primary">
+      <a class="btn active" href="#" aria-current="page">
+        <i class="fa-solid fa-house"></i><span>Home</span>
+      </a>
+      <a class="btn" href="#">
+        <i class="fa-solid fa-user-plus"></i><span>Create</span>
+      </a>
+      <a class="btn" href="#">
+        <i class="fa-solid fa-right-left"></i><span>Transaction</span>
+      </a>
+      <a class="btn" href="#">
+        <i class="fa-solid fa-right-to-bracket"></i><span>Login</span>
+      </a>
+      <a class="btn" href="#">
+        <i class="fa-solid fa-wallet"></i><span>Check Balance</span>
+      </a>
+      <a class="btn" href="#">
+        <i class="fa-solid fa-gear"></i><span>Change</span>
+      </a>
+      <a class="btn danger" href="#">
+        <i class="fa-solid fa-trash"></i><span>Delete</span>
+      </a>
+    </nav>
+
+    <main>
+      <h2>Welcome!</h2>
+      <p class="lead">Select an action above to begin. Your secure MCC dashboard will show recent activity, quick actions, and account status once you log in.</p>
+    </main>
+  </div>
+
+  <footer role="contentinfo">
+    <div class="footer-inner">
+      <div>© 2025 MCC Bank • All rights reserved</div>
+      <div class="links">
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">Security</a>
+        <a href="#"><i class="fa-solid fa-envelope"></i> support@mccbank.com</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
